@@ -1,0 +1,37 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/docs.yml
+      - docs/**
+      - include/**
+      - src/**
+      - book.toml
+      - CHANGELOG.md
+      - Doxyfile
+      - LICENSE
+      - manifest.json
+      - README.md
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  docs:
+    permissions:
+      contents: write
+      packages: read
+
+    uses: liara-engine/.github/.github/workflows/reusable-docs.yml@v2
+    with:
+      image: ghcr.io/liara-engine/liara-documentation-builder:latest
+      output-repository: liara-engine/liara-docs
+      source-repository: liara-engine/liara-platform
+      repo: ${{ github.repository }}
+      version: ${{ github.ref_type == 'tag' && github.ref_name || 'dev' }}
+
+    secrets:
+      ghcr-token: ${{ secrets.GITHUB_TOKEN }}
+      push-token: ${{ secrets.DOCS_PUSH_TOKEN }}

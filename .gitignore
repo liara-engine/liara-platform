@@ -1,0 +1,12 @@
+.idea
+.vscode
+
+build
+target
+
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store

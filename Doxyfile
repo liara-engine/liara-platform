@@ -1,0 +1,14 @@
+PROJECT_NAME           = "Liara Platform"
+PROJECT_BRIEF          = "C++ platform abstraction library for the Liara game engine"
+
+INPUT                  = include/
+RECURSIVE              = YES
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+BUILTIN_STL_SUPPORT    = YES
+MARKDOWN_SUPPORT       = YES
+
+ALIASES += "threadsafety=<dl class='section threadsafety'><dt>Thread Safety</dt><dd>"
+ALIASES += "endthreadsafety=</dd></dl>"

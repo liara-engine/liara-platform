@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/ci.yml
+      - include/**
+      - src/**
+      - tests/**
+      - .clang-format
+      - .clang-tidy
+      - CMakeLists.txt
+      - manifest.json
+      - vcpkg.json
+      - vcpkg-configuration.json
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/ci.yml
+      - include/**
+      - src/**
+      - tests/**
+      - .clang-format
+      - .clang-tidy
+      - CMakeLists.txt
+      - manifest.json
+      - vcpkg.json
+      - vcpkg-configuration.json
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    uses: liara-engine/.github/.github/workflows/reusable-build-and-test.yml@v2
+    with:
+      module: liara-platform
+      github-repo-version: v2
+
+  lint:
+    uses: liara-engine/.github/.github/workflows/reusable-lint.yml@v2
+    with:
+      module: liara-platform
+      github-repo-version: v2
+
+  report:
+    needs: [ build-and-test, lint ]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: liara-engine/.github/.github/workflows/reusable-ci-report.yml@v2
+    with:
+      title: 'CI report'
+      header: 'ci-report'
+      github-repo-version: v2

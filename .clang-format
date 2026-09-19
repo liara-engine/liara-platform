@@ -1,0 +1,155 @@
+---
+# Liara Engine - clang-format configuration
+# See docs/CODE_STYLE.md for explanations of each section.
+
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+
+# === INDENTATION & SPACING ===
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+AccessModifierOffset: -4
+
+# === LINE LENGTH ===
+ColumnLimit: 120
+ReflowComments: Always
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 2
+
+# === BRACES ===
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: true
+  AfterFunction: false
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+
+# === SPACING ===
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpacesInAngles: Never
+SpacesInContainerLiterals: false
+SpacesInSquareBrackets: false
+
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InEmptyParentheses: false
+  InCStyleCasts: false
+
+# === POINTERS & REFERENCES ===
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# === INCLUDES ===
+SortIncludes: CaseInsensitive
+IncludeBlocks: Regroup
+IncludeCategories:
+  # 0. Special headers that must come first
+  - Regex: '^<SDL\.h>$'
+    Priority: 0
+    SortPriority: 0
+  # 1. Module's own header (corresponding .h for a .cpp)
+  - Regex: '^"[^/]+\.h"$'
+    Priority: 1
+    SortPriority: 1
+  # 2. Other headers from the same module
+  - Regex: '^"[^"]+/[^"]+\.h"$'
+    Priority: 2
+    SortPriority: 2
+  # 3. Liara public interface headers
+  - Regex: '^<liara/.*>$'
+    Priority: 3
+    SortPriority: 3
+  # 4. Vulkan, SDL, ImGui, GLM and other third-party with C-style includes
+  - Regex: '^<(vulkan|SDL|imgui|glm|cgltf)/.*>$'
+    Priority: 4
+    SortPriority: 4
+  # 5. C++ standard library
+  - Regex: '^<[a-z_]+>$'
+    Priority: 5
+    SortPriority: 5
+  # 6. C standard library
+  - Regex: '^<[a-z_]+\.h>$'
+    Priority: 6
+    SortPriority: 6
+  # 7. Other (catch-all)
+  - Regex: '.*'
+    Priority: 7
+    SortPriority: 7
+
+# === ALIGNMENT ===
+AlignAfterOpenBracket: true
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: false
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignOperands: Align
+
+# === BREAK / WRAP ===
+BreakAfterReturnType: Automatic
+PenaltyReturnTypeOnItsOwnLine: 100000
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeConceptDeclarations: Always
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: true
+PackConstructorInitializers: Never
+
+# === LAMBDA ===
+AllowShortLambdasOnASingleLine: All
+LambdaBodyIndentation: Signature
+
+# === CONTROL FLOW ===
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+
+# === EMPTY LINES ===
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+SeparateDefinitionBlocks: Always
+
+# === MISC ===
+CompactNamespaces: false
+FixNamespaceComments: true
+NamespaceIndentation: All
+SortUsingDeclarations: true

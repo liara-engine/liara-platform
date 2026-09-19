@@ -1,0 +1,15 @@
+#pragma once
+
+#include <liara/version.h>
+
+#define LIARA_PLATFORM_VERSION LIARA_MAKE_VERSION_UNSAFE( \
+    @PROJECT_VERSION_MAJOR@,                              \
+    @PROJECT_VERSION_MINOR@,                              \
+    @PROJECT_VERSION_PATCH@                               \
+)
+
+#define LIARA_PLATFORM_MAJOR_VERSION @PROJECT_VERSION_MAJOR@
+#define LIARA_PLATFORM_MINOR_VERSION @PROJECT_VERSION_MINOR@
+#define LIARA_PLATFORM_PATCH_VERSION @PROJECT_VERSION_PATCH@
+
+#define LIARA_PLATFORM_VERSION_STRING "@PROJECT_VERSION@"

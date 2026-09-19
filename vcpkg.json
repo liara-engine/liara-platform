@@ -1,0 +1,16 @@
+{
+  "name": "liara-platform",
+  "version": "0.0.0",
+  "description": "The platform abstraction library for the Liara game engine.",
+  "homepage": "https://github.com/liara-engine/liara-platform",
+  "license": "MIT",
+  "dependencies": [],
+  "features": {
+    "tests": {
+      "description": "Build the liara-platform test suite.",
+      "dependencies": [
+        "doctest"
+      ]
+    }
+  }
+}

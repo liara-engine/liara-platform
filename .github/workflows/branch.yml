@@ -1,0 +1,37 @@
+name: branch
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - .github/workflows/branch.yml
+      - include/**
+      - src/**
+      - tests/**
+      - .clang-format
+      - .clang-tidy
+      - CMakeLists.txt
+      - manifest.json
+      - vcpkg.json
+      - vcpkg-configuration.json
+
+concurrency:
+  group: branch-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: liara-engine/.github/.github/workflows/reusable-module-build.yml@v2
+    with:
+      module: liara-platform
+      github-repo-version: v2
+
+  format:
+    uses: liara-engine/.github/.github/workflows/reusable-lint.yml@v2
+    with:
+      module: liara-platform
+      run-tidy: false
+      github-repo-version: v2

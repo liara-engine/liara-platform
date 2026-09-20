@@ -1,20 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/ci.yml
-      - include/**
-      - src/**
-      - tests/**
-      - .clang-format
-      - .clang-tidy
-      - CMakeLists.txt
-      - manifest.json
-      - vcpkg.json
-      - vcpkg-configuration.json
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
     paths:
       - .github/workflows/ci.yml

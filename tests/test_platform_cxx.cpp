@@ -67,4 +67,28 @@ TEST_CASE("liara_platform_create - refuses a struct version it does not understa
 
 TEST_CASE("liara_platform_destroy - a null handle is a no-op") { liara_platform_destroy(nullptr); }
 
+TEST_CASE("liara_platform_quit_requested - is false on a fresh handle") {
+    const liara_platform_create_info_t info {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION, .reserved = 0};
+    liara_platform_handle_t* platform = nullptr;
+    REQUIRE(liara_platform_create(&info, &platform) == LIARA_RESULT_SUCCESS);
+
+    CHECK(liara_platform_quit_requested(platform) == false);
+
+    liara_platform_destroy(platform);
+}
+
+TEST_CASE("liara_platform_install_signal_handlers - succeeds, and again for a second handle") {
+    const liara_platform_create_info_t info {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION, .reserved = 0};
+    liara_platform_handle_t* first = nullptr;
+    liara_platform_handle_t* second = nullptr;
+    REQUIRE(liara_platform_create(&info, &first) == LIARA_RESULT_SUCCESS);
+    REQUIRE(liara_platform_create(&info, &second) == LIARA_RESULT_SUCCESS);
+
+    CHECK(liara_platform_install_signal_handlers(first) == LIARA_RESULT_SUCCESS);
+    CHECK(liara_platform_install_signal_handlers(second) == LIARA_RESULT_SUCCESS);
+
+    liara_platform_destroy(second);
+    liara_platform_destroy(first);
+}
+
 // NOLINTEND(readability-identifier-naming)

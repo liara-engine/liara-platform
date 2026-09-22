@@ -1,3 +1,5 @@
+#include "Shutdown.h"
+
 #include <liara/abi_version.h>
 #include <liara/modules.h>
 #include <liara/platform/config.h>
@@ -48,3 +50,17 @@ void liara_platform_destroy(liara_platform_handle_t* platform) {
     // NOLINTEND(readability-identifier-naming)
     delete platform;
 }  // NOLINTEND(cppcoreguidelines-owning-memory)
+
+// NOLINTBEGIN(readability-identifier-naming)
+liara_result_t liara_platform_install_signal_handlers(liara_platform_handle_t* platform) {
+    // NOLINTEND(readability-identifier-naming)
+    if (platform == nullptr) { return LIARA_RESULT_NULL_POINTER; }
+    return Liara::Platform::Shutdown::Install() ? LIARA_RESULT_SUCCESS : LIARA_RESULT_FAILED;
+}
+
+// NOLINTBEGIN(readability-identifier-naming)
+bool liara_platform_quit_requested(const liara_platform_handle_t* platform) {
+    // NOLINTEND(readability-identifier-naming)
+    (void)platform;  // Stage 1 has no per-instance quit source. Stage 2's window close button adds one here.
+    return Liara::Platform::Shutdown::QuitRequested();
+}

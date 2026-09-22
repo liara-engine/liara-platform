@@ -91,4 +91,8 @@ TEST_CASE("liara_platform_install_signal_handlers - succeeds, and again for a se
     liara_platform_destroy(first);
 }
 
+TEST_CASE("liara_platform_install_signal_handlers - refuses a null handle") {
+    CHECK(liara_platform_install_signal_handlers(nullptr) == LIARA_RESULT_NULL_POINTER);
+}
+
 // NOLINTEND(readability-identifier-naming)

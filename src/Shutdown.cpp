@@ -1,10 +1,15 @@
 #include "Shutdown.h"
 
-#include <atomic>
 #include <csignal>
+#include <mutex>
 
 #ifdef _WIN32
     #include <windows.h>
+#else
+    // sigaction/sigemptyset are POSIX, not ISO C, so <csignal> (which only guarantees the C++-standard subset:
+    // std::signal, std::raise, std::sig_atomic_t) does not declare them. <signal.h> is the header that does, on
+    // every supported platform; modernize-deprecated-headers otherwise wants <csignal> in its place.
+    #include <signal.h>  // NOLINT(modernize-deprecated-headers)
 #endif
 
 namespace
@@ -14,8 +19,12 @@ namespace
     /// rather than an atomic bool.
     volatile std::sig_atomic_t g_QuitRequested = 0;
 
-    /// Guards the installation itself, so that two threads calling Install() install once between them.
-    std::atomic<bool> g_Installed {false};
+    /// Guards the installation itself, so that two threads calling Install() install once between them. A mutex
+    /// rather than a compare-and-swap on a bool: swapping the flag to true before the OS call is known to have
+    /// succeeded would let a second, losing thread observe "installed" and return true while the first thread's
+    /// sigaction/SetConsoleCtrlHandler call has not yet run or failed.
+    std::mutex g_InstallMutex;
+    bool g_Installed = false;  // Guarded by g_InstallMutex.
 
 #ifdef _WIN32
     BOOL WINAPI ConsoleHandler(const DWORD signal) {
@@ -33,33 +42,20 @@ namespace
 namespace Liara::Platform::Shutdown
 {
     bool Install() {
-        bool expected = false;
-        if (!g_Installed.compare_exchange_strong(expected, true)) { return true; }
+        const std::scoped_lock lock(g_InstallMutex);
+        if (g_Installed) { return true; }
 
 #ifdef _WIN32
-        if (SetConsoleCtrlHandler(ConsoleHandler, TRUE) == 0) {
-            g_Installed.store(false);
-            return false;
-        }
+        if (SetConsoleCtrlHandler(ConsoleHandler, TRUE) == 0) { return false; }
 #else
-        // misc-include-cleaner wants a header that directly "provides" sigaction/sigemptyset, but the only such
-        // header is the deprecated <signal.h>, and modernize-deprecated-headers requires <csignal> instead. <csignal>
-        // is what actually declares these POSIX extensions on every supported platform; the two checks disagree with
-        // each other here; modernize-deprecated-headers is the one this file keeps, so misc-include-cleaner yields.
-        // NOLINTBEGIN(misc-include-cleaner)
         struct sigaction action {};
         action.sa_handler = PosixHandler;
         sigemptyset(&action.sa_mask);
-        // NOLINTEND(misc-include-cleaner)
         action.sa_flags = 0;  // No SA_RESTART: an interrupted wait should return so the caller can resume it itself.
 
-        // NOLINTBEGIN(misc-include-cleaner)
-        if (sigaction(SIGINT, &action, nullptr) != 0 || sigaction(SIGTERM, &action, nullptr) != 0) {
-            // NOLINTEND(misc-include-cleaner)
-            g_Installed.store(false);
-            return false;
-        }
+        if (sigaction(SIGINT, &action, nullptr) != 0 || sigaction(SIGTERM, &action, nullptr) != 0) { return false; }
 #endif
+        g_Installed = true;
         return true;
     }
 

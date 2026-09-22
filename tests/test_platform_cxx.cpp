@@ -6,6 +6,7 @@
 #include <liara/platform/platform.h>
 #include <liara/result.h>
 
+#include <cstdint>
 #include <string_view>
 
 #include <doctest/doctest.h>
@@ -93,6 +94,47 @@ TEST_CASE("liara_platform_install_signal_handlers - succeeds, and again for a se
 
 TEST_CASE("liara_platform_install_signal_handlers - refuses a null handle") {
     CHECK(liara_platform_install_signal_handlers(nullptr) == LIARA_RESULT_NULL_POINTER);
+}
+
+TEST_CASE("liara_platform_time_now_ns - never decreases") {
+    constexpr int READINGS = 1000;
+
+    uint64_t previous = liara_platform_time_now_ns();
+    for (int i = 0; i < READINGS; ++i) {
+        const uint64_t current = liara_platform_time_now_ns();
+        REQUIRE(current >= previous);
+        previous = current;
+    }
+}
+
+TEST_CASE("liara_platform_time_sleep_until_ns - reaches the deadline") {
+    constexpr uint64_t TEN_MS_NS = 10ULL * 1000ULL * 1000ULL;
+    const uint64_t deadline = liara_platform_time_now_ns() + TEN_MS_NS;
+
+    liara_platform_time_sleep_until_ns(deadline);
+
+    // Only the "at least" direction is asserted. The contract promises no upper bound on overshoot, a loaded machine
+    // makes one unpredictable, and asserting one here would be a flake generator. Do not "fix" this by adding a
+    // ceiling.
+    CHECK(liara_platform_time_now_ns() >= deadline);
+}
+
+TEST_CASE("liara_platform_time_sleep_until_ns - a past deadline returns") {
+    const uint64_t now = liara_platform_time_now_ns();
+
+    liara_platform_time_sleep_until_ns(now);
+    liara_platform_time_sleep_until_ns(now > 0U ? now - 1U : 0U);
+}
+
+TEST_CASE("liara_platform_time_wall_ns - lands in a plausible band") {
+    constexpr int64_t YEAR_2020_NS = 1577836800LL * 1000LL * 1000LL * 1000LL;  // 2020-01-01T00:00:00Z
+    constexpr int64_t YEAR_2100_NS = 4102444800LL * 1000LL * 1000LL * 1000LL;  // 2100-01-01T00:00:00Z
+
+    const int64_t wall = liara_platform_time_wall_ns();
+
+    // Catches a unit mistake (microseconds taken for nanoseconds) and an epoch mistake, and cannot flake.
+    CHECK(wall > YEAR_2020_NS);
+    CHECK(wall < YEAR_2100_NS);
 }
 
 // NOLINTEND(readability-identifier-naming)

@@ -1,4 +1,5 @@
 #include "Shutdown.h"
+#include "Time.h"
 
 #include <liara/abi_version.h>
 #include <liara/modules.h>
@@ -64,3 +65,14 @@ bool liara_platform_quit_requested(const liara_platform_handle_t* platform) {
     (void)platform;  // Stage 1 has no per-instance quit source. Stage 2's window close button adds one here.
     return Liara::Platform::Shutdown::QuitRequested();
 }
+
+// NOLINTBEGIN(readability-identifier-naming)
+uint64_t liara_platform_time_now_ns(void) { return Liara::Platform::Time::NowNs(); }
+
+int64_t liara_platform_time_wall_ns(void) { return Liara::Platform::Time::WallNs(); }
+
+void liara_platform_time_sleep_until_ns(const uint64_t deadline_ns) {
+    Liara::Platform::Time::SleepUntilNs(deadline_ns);
+}
+
+// NOLINTEND(readability-identifier-naming)

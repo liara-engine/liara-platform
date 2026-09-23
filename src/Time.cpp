@@ -18,6 +18,12 @@ namespace Liara::Platform::Time
         return std::chrono::duration_cast<std::chrono::nanoseconds>(since).count();
     }
 
+    // This computes a relative duration from the deadline and sleeps on that, rather than sleeping on the absolute
+    // deadline itself. The header's "a signal does not cut the call short" therefore holds only because libstdc++'s
+    // sleep_for retries internally with the remainder after a spurious wake-up, not because this function targets an
+    // absolute deadline the way the contract describes. The per-platform refinement -
+    // clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME) under POSIX, a high-resolution waitable timer under Win32 -
+    // sleeps on the deadline directly and closes that gap. It changes no line of ABI.
     void SleepUntilNs(const std::uint64_t deadlineNs) {
         const std::uint64_t now = NowNs();
         if (deadlineNs <= now) { return; }

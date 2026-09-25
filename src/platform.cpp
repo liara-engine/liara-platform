@@ -12,8 +12,6 @@
 
 struct liara_platform_t
 {
-    // Stage 1 holds no per-instance state. The signal flag is process-global because a signal handler may touch
-    // nothing else, and the clock takes no handle at all. The window and its close-button state arrive in stage 2.
     char m_Unused = 0;
 };
 
@@ -74,5 +72,7 @@ int64_t liara_platform_time_wall_ns(void) { return Liara::Platform::Time::WallNs
 void liara_platform_time_sleep_until_ns(const uint64_t deadline_ns) {
     Liara::Platform::Time::SleepUntilNs(deadline_ns);
 }
+
+uint64_t liara_platform_time_resolution_ns(void) { return Liara::Platform::Time::ResolutionNs(); }
 
 // NOLINTEND(readability-identifier-naming)

@@ -3,9 +3,6 @@
 /**
  * @file Time.h
  * @brief The module's clock: a monotonic counter, a wall clock, and a sleep to a deadline.
- *
- * Free functions rather than a type, because there is nothing here to instantiate. `docs/code-style/naming.md` names
- * this case, a file holding free functions in a namespace taking the name of its concern.
  */
 
 #include <cstdint>
@@ -20,4 +17,7 @@ namespace Liara::Platform::Time
 
     /// Block until NowNs() has reached at least `deadlineNs`. A past deadline returns immediately.
     void SleepUntilNs(std::uint64_t deadlineNs);
+
+    /// Return the resolution of the monotonic clock in nanoseconds. This is the smallest measurable difference between two calls to NowNs().
+    std::uint64_t ResolutionNs();
 }  // namespace Liara::Platform::Time

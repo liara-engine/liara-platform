@@ -6,17 +6,12 @@
 #ifdef _WIN32
     #include <windows.h>
 #else
-    // sigaction/sigemptyset are POSIX, not ISO C, so <csignal> (which only guarantees the C++-standard subset:
-    // std::signal, std::raise, std::sig_atomic_t) does not declare them. <signal.h> is the header that does, on
-    // every supported platform; modernize-deprecated-headers otherwise wants <csignal> in its place.
     #include <signal.h>  // NOLINT(modernize-deprecated-headers)
 #endif
 
 namespace
 {
-    /// Written by the signal handler, read by everything else. `volatile sig_atomic_t` is the only thing a POSIX
-    /// handler may touch, and `std::atomic` is not guaranteed lock-free for every type, so this is the flag's type
-    /// rather than an atomic bool.
+    /// Written by the signal handler, read by everything else.
     volatile std::sig_atomic_t g_QuitRequested = 0;
 
     /// Guards the installation itself, so that two threads calling Install() install once between them. A mutex
@@ -24,7 +19,7 @@ namespace
     /// succeeded would let a second, losing thread observe "installed" and return true while the first thread's
     /// sigaction/SetConsoleCtrlHandler call has not yet run or failed.
     std::mutex g_InstallMutex;
-    bool g_Installed = false;  // Guarded by g_InstallMutex.
+    bool g_Installed = false;  ///< Guarded by g_InstallMutex.
 
 #ifdef _WIN32
     BOOL WINAPI ConsoleHandler(const DWORD signal) {

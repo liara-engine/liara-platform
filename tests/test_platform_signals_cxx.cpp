@@ -16,7 +16,7 @@
 
 TEST_CASE("liara_platform_quit_requested - goes true after SIGINT and stays true") {
 #ifndef _WIN32
-    const liara_platform_create_info_t info {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION, .reserved = 0};
+    constexpr liara_platform_create_info_t info {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION};
     liara_platform_handle_t* platform = nullptr;
     REQUIRE(liara_platform_create(&info, &platform) == LIARA_RESULT_SUCCESS);
     REQUIRE(liara_platform_install_signal_handlers(platform) == LIARA_RESULT_SUCCESS);

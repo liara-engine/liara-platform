@@ -7,3 +7,11 @@ target_link_libraries(test_platform_functions_cxx PRIVATE
         doctest::doctest)
 add_test(NAME test_platform_functions_cxx COMMAND test_platform_functions_cxx)
 set_tests_properties(test_platform_functions_cxx PROPERTIES LABELS "unit")
+
+add_executable(test_platform_signals_cxx test_platform_signals_cxx.cpp)
+target_link_libraries(test_platform_signals_cxx PRIVATE
+        Liara::Interfaces
+        Liara::Platform
+        doctest::doctest)
+add_test(NAME test_platform_signals_cxx COMMAND test_platform_signals_cxx)
+set_tests_properties(test_platform_signals_cxx PROPERTIES LABELS "unit")

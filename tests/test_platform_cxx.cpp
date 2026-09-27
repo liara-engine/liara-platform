@@ -179,7 +179,8 @@ TEST_CASE("liara_platform_time_resolution_ns - reports a positive resolution") {
 
     CHECK(resolution > 0U);
     CHECK(resolution <= static_cast<uint64_t>(
-              std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::duration(1)).count()));
+              std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::duration(1))
+                  .count()));  // The resolution cannot be coarser than the underlying clock's tick.
 }
 
 // NOLINTEND(readability-identifier-naming)

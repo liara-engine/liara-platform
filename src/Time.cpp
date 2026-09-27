@@ -7,7 +7,10 @@
     #include <windows.h>
 #elif defined(__linux__) || defined(__unix__)
     #include <cerrno>
-    #include <ctime>
+
+    #include <time.h>  // NOLINT(modernize-deprecated-headers)
+
+    #include <bits/time.h>
 #endif
 
 namespace Liara::Platform::Time
@@ -25,8 +28,7 @@ namespace Liara::Platform::Time
         uint64_t remainder = static_cast<uint64_t>(counter.QuadPart) % static_cast<uint64_t>(frequency.QuadPart);
         return (seconds * 1000000000ULL) + ((remainder * 1000000000ULL) / static_cast<uint64_t>(frequency.QuadPart));
 #elif defined(__linux__) || defined(__unix__)
-        timespec ts {};
-        if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        if (timespec ts {}; clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
             return (static_cast<std::uint64_t>(ts.tv_sec) * 1'000'000'000ULL) + static_cast<std::uint64_t>(ts.tv_nsec);
         }
         return 0;  // Fallback to 0 if clock_gettime fails
@@ -47,8 +49,7 @@ namespace Liara::Platform::Time
         int64_t ns_since_epoch = static_cast<int64_t>(uli.QuadPart - EPOCH_DIFFERENCE_100NS) * 100LL;
         return ns_since_epoch;
 #elif defined(__linux__) || defined(__unix__)
-        timespec ts {};
-        if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+        if (timespec ts {}; clock_gettime(CLOCK_REALTIME, &ts) == 0) {
             return (static_cast<std::int64_t>(ts.tv_sec) * 1'000'000'000LL) + static_cast<std::int64_t>(ts.tv_nsec);
         }
         return 0;  // Fallback to 0 if clock_gettime fails
@@ -83,8 +84,9 @@ namespace Liara::Platform::Time
     std::uint64_t ResolutionNs() {
 #ifdef _WIN32
         LARGE_INTEGER frequency;
-        QueryPerformanceFrequency(&frequency);
-        return static_cast<std::uint64_t>(1'000'000'000ULL) / static_cast<std::uint64_t>(frequency.QuadPart);
+        if (!QueryPerformanceFrequency(&frequency) || frequency.QuadPart <= 0) { return 1; }
+        return (1'000'000'000ULL + static_cast<std::uint64_t>(frequency.QuadPart) - 1)
+               / static_cast<std::uint64_t>(frequency.QuadPart);
 #elif defined(__linux__) || defined(__unix__)
         if (timespec ts {}; clock_getres(CLOCK_MONOTONIC, &ts) == 0) {
             return (static_cast<std::uint64_t>(ts.tv_sec) * 1'000'000'000ULL) + static_cast<std::uint64_t>(ts.tv_nsec);

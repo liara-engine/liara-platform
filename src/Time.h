@@ -18,6 +18,7 @@ namespace Liara::Platform::Time
     /// Block until NowNs() has reached at least `deadlineNs`. A past deadline returns immediately.
     void SleepUntilNs(std::uint64_t deadlineNs);
 
-    /// Return the resolution of the monotonic clock in nanoseconds. This is the smallest measurable difference between two calls to NowNs().
+    /// Return the resolution of the monotonic clock in nanoseconds. This is the smallest measurable difference between
+    /// two calls to NowNs().
     std::uint64_t ResolutionNs();
 }  // namespace Liara::Platform::Time

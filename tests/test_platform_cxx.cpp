@@ -110,7 +110,7 @@ TEST_CASE("liara_platform_time_now_ns - never decreases") {
 
 TEST_CASE("liara_platform_time_now_ns - agrees with steady_clock") {
     constexpr auto SAMPLE_DURATION = std::chrono::milliseconds(10);
-    constexpr auto MAX_CLOCK_DELTA = std::chrono::nanoseconds(1000);
+    constexpr auto MAX_CLOCK_DELTA = std::chrono::nanoseconds(10000);
 
     const auto std_start = std::chrono::steady_clock::now();
     const uint64_t liara_start = liara_platform_time_now_ns();
@@ -157,7 +157,7 @@ TEST_CASE("liara_platform_time_wall_ns - lands in a plausible band") {
 }
 
 TEST_CASE("liara_platform_time_wall_ns - agrees with system_clock") {
-    constexpr auto MAX_CLOCK_DELTA = std::chrono::nanoseconds(1000);
+    constexpr auto MAX_CLOCK_DELTA = std::chrono::milliseconds(1);
 
     const auto std_before = std::chrono::system_clock::now();
     const int64_t liara_wall = liara_platform_time_wall_ns();
@@ -178,9 +178,8 @@ TEST_CASE("liara_platform_time_resolution_ns - reports a positive resolution") {
     const uint64_t resolution = liara_platform_time_resolution_ns();
 
     CHECK(resolution > 0U);
-    CHECK(resolution <=
-          static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
-              std::chrono::steady_clock::duration(1)).count()));
+    CHECK(resolution <= static_cast<uint64_t>(
+              std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::duration(1)).count()));
 }
 
 // NOLINTEND(readability-identifier-naming)

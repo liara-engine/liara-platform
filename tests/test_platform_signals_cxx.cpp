@@ -11,8 +11,7 @@
 // rather than beside cases that may want the default disposition for SIGINT.
 //
 // The Windows half is not covered. SetConsoleCtrlHandler runs its handler on a thread the operating system creates,
-// and no portable call provokes it from inside the process, so Windows shutdown is verified by hand until something
-// better exists. Saying so here is the point: a test that pretended to cover it would be worse than this comment.
+// and no portable call provokes it from inside the process, so Windows shutdown is verified by hand.
 
 TEST_CASE("liara_platform_quit_requested - goes true after SIGINT and stays true") {
 #ifndef _WIN32

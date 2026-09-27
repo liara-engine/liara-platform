@@ -12,33 +12,33 @@
 namespace
 {
     /// Written by the signal handler, read by everything else.
-    volatile std::sig_atomic_t g_QuitRequested = 0;
+    volatile std::sig_atomic_t gQuitRequested = 0;
 
     /// Guards the installation itself, so that two threads calling Install() install once between them. A mutex
     /// rather than a compare-and-swap on a bool: swapping the flag to true before the OS call is known to have
     /// succeeded would let a second, losing thread observe "installed" and return true while the first thread's
     /// sigaction/SetConsoleCtrlHandler call has not yet run or failed.
-    std::mutex g_InstallMutex;
-    bool g_Installed = false;  ///< Guarded by g_InstallMutex.
+    std::mutex gInstallMutex;
+    bool gInstalled = false;  ///< Guarded by g_InstallMutex.
 
 #ifdef _WIN32
     BOOL WINAPI ConsoleHandler(const DWORD signal) {
         if (signal == CTRL_C_EVENT || signal == CTRL_BREAK_EVENT || signal == CTRL_CLOSE_EVENT) {
-            g_QuitRequested = 1;
+            gQuitRequested = 1;
             return TRUE;
         }
         return FALSE;
     }
 #else
-    extern "C" void PosixHandler(int /*signal*/) { g_QuitRequested = 1; }
+    extern "C" void PosixHandler(int /*signal*/) { gQuitRequested = 1; }
 #endif
 }  // namespace
 
 namespace Liara::Platform::Shutdown
 {
     bool Install() {
-        const std::scoped_lock lock(g_InstallMutex);
-        if (g_Installed) { return true; }
+        const std::scoped_lock lock(gInstallMutex);
+        if (gInstalled) { return true; }
 
 #ifdef _WIN32
         if (SetConsoleCtrlHandler(ConsoleHandler, TRUE) == 0) { return false; }
@@ -50,9 +50,9 @@ namespace Liara::Platform::Shutdown
 
         if (sigaction(SIGINT, &action, nullptr) != 0 || sigaction(SIGTERM, &action, nullptr) != 0) { return false; }
 #endif
-        g_Installed = true;
+        gInstalled = true;
         return true;
     }
 
-    bool QuitRequested() { return g_QuitRequested != 0; }
+    bool QuitRequested() { return gQuitRequested != 0; }
 }  // namespace Liara::Platform::Shutdown

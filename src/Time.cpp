@@ -6,14 +6,15 @@
     #define WIN32_LEAN_AND_MEAN
     #include <windows.h>
 #elif defined(__linux__) || defined(__unix__)
-    #include <time.h>
-    #include <errno.h>
+    #include <cerrno>
+    #include <ctime>
 #endif
 
-namespace Liara::Platform::Time {
+namespace Liara::Platform::Time
+{
 
     std::uint64_t NowNs() {
-    #ifdef _WIN32
+#ifdef _WIN32
         LARGE_INTEGER frequency;
         LARGE_INTEGER counter;
 
@@ -23,15 +24,17 @@ namespace Liara::Platform::Time {
         uint64_t seconds = static_cast<uint64_t>(counter.QuadPart) / static_cast<uint64_t>(frequency.QuadPart);
         uint64_t remainder = static_cast<uint64_t>(counter.QuadPart) % static_cast<uint64_t>(frequency.QuadPart);
         return (seconds * 1000000000ULL) + ((remainder * 1000000000ULL) / static_cast<uint64_t>(frequency.QuadPart));
-    #elif defined(__linux__) || defined(__unix__)
-        timespec ts{};
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        return (static_cast<std::uint64_t>(ts.tv_sec) * 1'000'000'000ULL) + static_cast<std::uint64_t>(ts.tv_nsec);
-    #endif
+#elif defined(__linux__) || defined(__unix__)
+        timespec ts {};
+        if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+            return (static_cast<std::uint64_t>(ts.tv_sec) * 1'000'000'000ULL) + static_cast<std::uint64_t>(ts.tv_nsec);
+        }
+        return 0;  // Fallback to 0 if clock_gettime fails
+#endif
     }
 
     std::int64_t WallNs() {
-    #ifdef _WIN32
+#ifdef _WIN32
         FILETIME ft;
         GetSystemTimeAsFileTime(&ft);
         ULARGE_INTEGER uli;
@@ -43,48 +46,50 @@ namespace Liara::Platform::Time {
 
         int64_t ns_since_epoch = static_cast<int64_t>(uli.QuadPart - EPOCH_DIFFERENCE_100NS) * 100LL;
         return ns_since_epoch;
-    #elif defined(__linux__) || defined(__unix__)
-        timespec ts{};
-        clock_gettime(CLOCK_REALTIME, &ts);
-        return (static_cast<std::int64_t>(ts.tv_sec) * 1'000'000'000LL) + static_cast<std::int64_t>(ts.tv_nsec);
-    #endif
+#elif defined(__linux__) || defined(__unix__)
+        timespec ts {};
+        if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+            return (static_cast<std::int64_t>(ts.tv_sec) * 1'000'000'000LL) + static_cast<std::int64_t>(ts.tv_nsec);
+        }
+        return 0;  // Fallback to 0 if clock_gettime fails
+#endif
     }
 
     void SleepUntilNs(const std::uint64_t deadlineNs) {
-        const uint64_t now_ns = NowNs();
+        const uint64_t nowNs = NowNs();
 
-        if (deadlineNs <= now_ns) {
-            return; // Deadline has already passed
+        if (deadlineNs <= nowNs) {
+            return;  // Deadline has already passed
         }
 
-        const uint64_t duration_ns = deadlineNs - now_ns;
+        const uint64_t durationNs = deadlineNs - nowNs;
 
-    #ifdef _WIN32
+#ifdef _WIN32
         // Convert nanoseconds to milliseconds for Sleep function
-        DWORD duration_ms = static_cast<DWORD>(duration_ns / 1'000'000ULL);
+        DWORD duration_ms = static_cast<DWORD>(durationNs / 1'000'000ULL);
         Sleep(duration_ms);
-    #elif defined(__linux__) || defined(__unix__)
-        timespec ts{};
-        ts.tv_sec = duration_ns / 1'000'000'000ULL;
-        ts.tv_nsec = duration_ns % 1'000'000'000ULL;
+#elif defined(__linux__) || defined(__unix__)
+        timespec ts {};
+        ts.tv_sec = static_cast<time_t>(durationNs / 1'000'000'000ULL);
+        ts.tv_nsec = static_cast<time_t>(durationNs % 1'000'000'000ULL);
 
-        timespec remaining{};
+        timespec remaining {};
         while (nanosleep(&ts, &remaining) == -1 && errno == EINTR) {
-            ts = remaining; // Continue sleeping for the remaining time
+            ts = remaining;  // Continue sleeping for the remaining time
         }
-    #endif
+#endif
     }
 
     std::uint64_t ResolutionNs() {
-    #ifdef _WIN32
+#ifdef _WIN32
         LARGE_INTEGER frequency;
         QueryPerformanceFrequency(&frequency);
         return static_cast<std::uint64_t>(1'000'000'000ULL) / static_cast<std::uint64_t>(frequency.QuadPart);
-    #elif defined(__linux__) || defined(__unix__)
-        if (timespec ts{}; clock_getres(CLOCK_MONOTONIC, &ts) == 0) {
+#elif defined(__linux__) || defined(__unix__)
+        if (timespec ts {}; clock_getres(CLOCK_MONOTONIC, &ts) == 0) {
             return (static_cast<std::uint64_t>(ts.tv_sec) * 1'000'000'000ULL) + static_cast<std::uint64_t>(ts.tv_nsec);
         }
-        return 1; // Fallback to 1 nanosecond if clock_getres fails
-    #endif
+        return 1;  // Fallback to 1 nanosecond if clock_getres fails
+#endif
     }
-} // namespace Liara::Platform::Time
+}  // namespace Liara::Platform::Time

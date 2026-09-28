@@ -16,8 +16,9 @@ target_link_libraries(test_platform_signals_cxx PRIVATE
 add_test(NAME test_platform_signals_cxx COMMAND test_platform_signals_cxx)
 set_tests_properties(test_platform_signals_cxx PROPERTIES LABELS "unit")
 
-# The window tests run under SDL's offscreen driver, which needs no display. Naming the driver here keeps the knowledge
-# that the backend is SDL inside the repository that uses it.
+# The window tests run under SDL's offscreen driver, which needs no display, and with SDL's window surface kept a
+# software framebuffer, since SDL otherwise backs it with a GPU renderer and the tests would depend on the machine's GL
+# driver. Naming both here keeps the knowledge that the backend is SDL inside the repository that uses it.
 add_executable(test_platform_window_cxx test_platform_window_cxx.cpp)
 target_link_libraries(test_platform_window_cxx PRIVATE
         Liara::Interfaces
@@ -26,7 +27,7 @@ target_link_libraries(test_platform_window_cxx PRIVATE
 add_test(NAME test_platform_window_cxx COMMAND test_platform_window_cxx)
 set_tests_properties(test_platform_window_cxx PROPERTIES
         LABELS "unit"
-        ENVIRONMENT "SDL_VIDEO_DRIVER=offscreen")
+        ENVIRONMENT "SDL_VIDEO_DRIVER=offscreen;SDL_FRAMEBUFFER_ACCELERATION=0")
 
 # Needs a real window-system session; CI excludes the `display` label.
 add_executable(test_platform_native_window_cxx test_platform_native_window_cxx.cpp)
@@ -53,6 +54,6 @@ if(NOT BUILD_SHARED_LIBS OR WIN32)
         add_test(NAME ${test} COMMAND ${test})
         set_tests_properties(${test} PROPERTIES
                 LABELS "unit"
-                ENVIRONMENT "SDL_VIDEO_DRIVER=offscreen")
+                ENVIRONMENT "SDL_VIDEO_DRIVER=offscreen;SDL_FRAMEBUFFER_ACCELERATION=0")
     endforeach()
 endif()

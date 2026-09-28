@@ -28,10 +28,14 @@ namespace
     constexpr std::uint8_t PLACEHOLDER_BLUE = 0x30;
 
     /// The largest side the module asks SDL for, 16384 being the largest 2D image dimension common GPUs support.
-    /// The placeholder paints through SDL's window surface, which SDL backs with a GPU renderer wherever the driver has
-    /// no software framebuffer (Wayland, the offscreen driver by default), and Mesa crashes binding a context to a
+    /// The placeholder paints through SDL's window surface, which SDL backs with a GPU renderer by default on every
+    /// Linux driver (and must on Wayland, which has no software framebuffer), and Mesa crashes binding a context to a
     /// surface of absurd size. `requested_size` is a request, so clamping it stays within the contract.
     constexpr std::uint32_t MAX_WINDOW_SIDE = 16384;
+
+    /// Above this many pixels the placeholder is not painted: a surface of the clamped maximum costs a GiB, and the
+    /// contract promises no content anyway. 8192 x 8192 still covers a window filling an 8K display.
+    constexpr std::uint64_t PLACEHOLDER_PIXEL_BUDGET = 8192ULL * 8192ULL;
 
     /// SDL takes sizes as `int`; the clamp also keeps a large request from wrapping into a negative size.
     int ToSdlSize(const std::uint32_t size) { return static_cast<int>(std::min(size, MAX_WINDOW_SIDE)); }
@@ -127,6 +131,10 @@ namespace Liara::Platform
         // Scaffolding, to delete once a renderer presents to this window through a swapchain: two producers attaching
         // buffers to one surface would fight. Until then it is what makes the window visible at all, since Wayland,
         // XWayland included, never shows a surface nothing was committed to.
+        if (liara_extent2d_t size {};
+            !PixelSize(size) || static_cast<std::uint64_t>(size.width) * size.height > PLACEHOLDER_PIXEL_BUDGET) {
+            return;
+        }
         SDL_Surface* surface = SDL_GetWindowSurface(m_Window.get());
         if (surface == nullptr) { return; }
         SDL_FillSurfaceRect(surface,

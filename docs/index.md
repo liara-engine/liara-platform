@@ -28,7 +28,7 @@ No file I/O beyond resolving standard paths, since reading files is `liara-asset
 
 ## What exists today
 
-The create and destroy lifecycle, the shutdown surface, the clock, and windows with their events. A window is opened through SDL3, reports its size in pixels, describes itself to a renderer through the tagged `liara_native_window_t`, and produces close and resize events that `liara_platform_poll_event` returns one at a time. Closing the last window of an instance raises the same quit flag as SIGINT. Input devices are designed and not yet written.
+The create and destroy lifecycle, the shutdown surface, the clock, and windows with their events. A window is opened through SDL3, reports its size in pixels, describes itself to a renderer through the tagged `liara_native_window_t`, and produces close and resize events that `liara_platform_poll_event` returns one at a time. A close request on the last open window of an instance makes `liara_platform_quit_requested` report a stop, as SIGINT does. Input devices are designed and not yet written.
 
 `src/platform.cpp` is the ABI shim and holds nothing else. Behind it, `Instance`, `Window`, `VideoSubsystem`, `Events`, `Shutdown` and `Time` each hold one concern. The `manifest.json` `dev` entry tracks the unreleased ABI, as every module does until ABI 1.0.0 is tagged.
 

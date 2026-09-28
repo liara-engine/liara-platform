@@ -10,9 +10,9 @@ namespace Liara::Platform
     /**
      * @brief Holds one reference on SDL's video subsystem, which SDL counts.
      *
-     * The first reference sets the hints the module depends on and starts the subsystem; the last one released stops
-     * it. An instance with no window never takes one, which is what keeps a headless instance off the video subsystem.
-     * Main thread only, like every SDL video call.
+     * Each reference sets the hints the module depends on before taking its share of the subsystem, which SDL starts
+     * with the first reference and stops with the last. An instance with no window never takes one, which is what keeps
+     * a headless instance off the video subsystem. Main thread only, like every SDL video call.
      */
     class VideoSubsystem
     {

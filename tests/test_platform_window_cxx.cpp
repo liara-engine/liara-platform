@@ -10,6 +10,10 @@
 #include <cstdint>
 #include <string_view>
 
+#ifdef __linux__
+    #include <sys/resource.h>
+#endif
+
 #include <doctest/doctest.h>
 
 // Runs under SDL's offscreen video driver (SDL_VIDEO_DRIVER=offscreen, set by tests/CMakeLists.txt), so it needs no
@@ -145,6 +149,18 @@ TEST_CASE_FIXTURE(PlatformFixture,
     CHECK((result == LIARA_RESULT_SUCCESS || result == LIARA_RESULT_FAILED));
     if (result == LIARA_RESULT_SUCCESS) { liara_platform_window_destroy(window); }
     else { CHECK(window == nullptr); }
+
+#ifdef __linux__
+    // Peak resident memory of the whole binary so far, in kilobytes. The placeholder must not paint a surface of the
+    // clamped size (16384 x 16384 pixels, a GiB), which every CI run would otherwise pay for.
+    // glibc defines rusage in a bits/ header that include-cleaner does not map back to <sys/resource.h>.
+    rusage usage {};  // NOLINT(misc-include-cleaner)
+    // Named booleans rather than CHECK(a < b), which clang-analyzer reports as a leak in doctest.h, a false positive.
+    const bool measured = getrusage(RUSAGE_SELF, &usage) == 0;
+    REQUIRE(measured);
+    const bool withinBudget = usage.ru_maxrss < 512L * 1024L;
+    CHECK(withinBudget);
+#endif
 }
 
 TEST_CASE("liara_platform_window_destroy - a null handle is a no-op") { liara_platform_window_destroy(nullptr); }

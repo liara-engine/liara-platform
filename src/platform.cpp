@@ -8,6 +8,7 @@
 #include <liara/modules.h>
 #include <liara/native_window.h>
 #include <liara/platform/config.h>
+#include <liara/platform/event.h>
 #include <liara/platform/platform.h>
 #include <liara/platform/window.h>
 #include <liara/result.h>
@@ -118,8 +119,18 @@ liara_result_t liara_platform_install_signal_handlers(liara_platform_handle_t* p
 // NOLINTBEGIN(readability-identifier-naming)
 bool liara_platform_quit_requested(const liara_platform_handle_t* platform) {
     // NOLINTEND(readability-identifier-naming)
-    (void)platform;  // Stage 1 has no per-instance quit source. Stage 2's window close button adds one here.
-    return Liara::Platform::Shutdown::QuitRequested();
+    return Liara::Platform::Shutdown::QuitRequested() || platform->m_Instance.QuitRequested();
+}
+
+// NOLINTBEGIN(readability-identifier-naming)
+bool liara_platform_poll_event(liara_platform_handle_t* platform, liara_platform_event_t* out_event) {
+    // NOLINTEND(readability-identifier-naming)
+    try {
+        return platform->m_Instance.Poll(*out_event);
+    }
+    catch (...) {
+        return false;  // Nothing unwinds through the boundary; an event lost to an allocation failure is dropped.
+    }
 }
 
 // NOLINTBEGIN(readability-identifier-naming)

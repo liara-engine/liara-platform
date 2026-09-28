@@ -2,6 +2,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <liara/extent.h>
 #include <liara/native_window.h>
+#include <liara/platform/event.h>
 #include <liara/platform/platform.h>
 #include <liara/platform/window.h>
 #include <liara/result.h>
@@ -180,6 +181,24 @@ TEST_CASE("liara_platform_window_get_native - refuses a null window") {
 TEST_CASE_FIXTURE(PlatformFixture, "liara_platform_quit_requested - stays false once a window exists") {
     liara_platform_window_handle_t* window = OpenWindow();
     CHECK(liara_platform_quit_requested(platform) == false);
+    liara_platform_window_destroy(window);
+}
+
+TEST_CASE_FIXTURE(PlatformFixture, "liara_platform_poll_event - is false on an instance that never opened a window") {
+    // No window means SDL's video subsystem never started; the poll must not call into an uninitialised SDL.
+    liara_platform_event_t event {};
+    CHECK(liara_platform_poll_event(platform, &event) == false);
+    CHECK(event.type == LIARA_PLATFORM_EVENT_NONE);
+}
+
+TEST_CASE_FIXTURE(PlatformFixture, "liara_platform_poll_event - is false when nothing happened to a window") {
+    liara_platform_window_handle_t* window = OpenWindow();
+    liara_platform_event_t event {};
+
+    // Drain whatever creating the window produced (the offscreen driver may report its size), then expect silence.
+    while (liara_platform_poll_event(platform, &event)) {}
+    CHECK(liara_platform_poll_event(platform, &event) == false);
+
     liara_platform_window_destroy(window);
 }
 

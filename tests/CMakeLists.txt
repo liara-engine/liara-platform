@@ -36,3 +36,23 @@ target_link_libraries(test_platform_native_window_cxx PRIVATE
         doctest::doctest)
 add_test(NAME test_platform_native_window_cxx COMMAND test_platform_native_window_cxx)
 set_tests_properties(test_platform_native_window_cxx PROPERTIES LABELS "display")
+
+# These inject events through SDL, so they must share the module's copy of it. That holds for static builds, and on
+# Windows where SDL3.dll is the only copy. Under the Linux shared presets SDL sits inside liara_platform.so, hidden by
+# --exclude-libs, and the test would link a second copy. What they check, translation and routing, does not depend on
+# the link mode.
+if(NOT BUILD_SHARED_LIBS OR WIN32)
+    find_package(SDL3 CONFIG REQUIRED)
+    foreach(test IN ITEMS test_platform_events_cxx test_platform_sdl_quit_cxx)
+        add_executable(${test} ${test}.cpp)
+        target_link_libraries(${test} PRIVATE
+                Liara::Interfaces
+                Liara::Platform
+                SDL3::SDL3
+                doctest::doctest)
+        add_test(NAME ${test} COMMAND ${test})
+        set_tests_properties(${test} PROPERTIES
+                LABELS "unit"
+                ENVIRONMENT "SDL_VIDEO_DRIVER=offscreen")
+    endforeach()
+endif()

@@ -55,4 +55,6 @@ namespace Liara::Platform::Shutdown
     }
 
     bool QuitRequested() { return gQuitRequested != 0; }
+
+    void RaiseQuit() { gQuitRequested = 1; }
 }  // namespace Liara::Platform::Shutdown

@@ -13,8 +13,9 @@
 #include <liara/platform/window.h>
 #include <liara/result.h>
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <new>
 #include <string_view>
@@ -64,8 +65,15 @@ liara_result_t liara_platform_create(const liara_platform_create_info_t* create_
 // NOLINTBEGIN(readability-identifier-naming)
 void liara_platform_destroy(liara_platform_handle_t* platform) {
     // NOLINTEND(readability-identifier-naming)
-    // Windows are children of their instance and go first; one still open here is a programming error.
-    assert(platform == nullptr || platform->m_Instance.OpenWindowCount() == 0);
+    if (platform == nullptr) { return; }
+#ifdef LIARA_ENABLE_ASSERTS
+    // Windows are children of their instance and go first; one still open here is a programming error, caught in debug
+    // builds. Not assert(): against glibc 2.44, clang-tidy's misc-static-assert flags every assert() as constant.
+    if (platform->m_Instance.OpenWindowCount() != 0) {
+        (void)std::fputs("liara_platform_destroy: the instance still has open windows; destroy them first.\n", stderr);
+        std::abort();
+    }
+#endif
     delete platform;
 }
 

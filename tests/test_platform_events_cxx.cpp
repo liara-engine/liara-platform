@@ -16,12 +16,16 @@
 // Injects events through SDL itself, so it has to share the module's copy of SDL: tests/CMakeLists.txt registers it
 // only where that holds, static builds and Windows. Runs under the offscreen driver.
 
+// The helpers below REQUIRE named booleans rather than `a == b`: inside a helper, clang-analyzer reports doctest's
+// binary-expression message as a leak, a false positive in doctest.h.
+
 namespace
 {
     liara_platform_handle_t* CreatePlatform() {
         constexpr liara_platform_create_info_t info {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION};
         liara_platform_handle_t* platform = nullptr;
-        REQUIRE(liara_platform_create(&info, &platform) == LIARA_RESULT_SUCCESS);
+        const bool created = liara_platform_create(&info, &platform) == LIARA_RESULT_SUCCESS;
+        REQUIRE(created);
         return platform;
     }
 
@@ -35,7 +39,8 @@ namespace
             .title_length = title.size()
         };
         liara_platform_window_handle_t* window = nullptr;
-        REQUIRE(liara_platform_window_create(platform, &info, &window) == LIARA_RESULT_SUCCESS);
+        const bool opened = liara_platform_window_create(platform, &info, &window) == LIARA_RESULT_SUCCESS;
+        REQUIRE(opened);
         return window;
     }
 
@@ -55,7 +60,8 @@ namespace
                          const SDL_WindowID id,
                          const Sint32 data1 = 0,
                          const Sint32 data2 = 0) {
-        REQUIRE(id != 0);
+        const bool known = id != 0;
+        REQUIRE(known);
         SDL_Event event {};
         event.type = type;
         event.window.windowID = id;

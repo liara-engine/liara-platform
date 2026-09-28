@@ -45,11 +45,14 @@ namespace
         PlatformFixture(PlatformFixture&&) = delete;
         PlatformFixture& operator=(PlatformFixture&&) = delete;
 
-        liara_platform_window_handle_t* OpenWindow() const {
+        [[nodiscard]] liara_platform_window_handle_t* OpenWindow() const {
             const liara_platform_window_create_info_t info = ValidWindowInfo();
             liara_platform_window_handle_t* window = nullptr;
-            REQUIRE(liara_platform_window_create(platform, &info, &window) == LIARA_RESULT_SUCCESS);
-            REQUIRE(window != nullptr);
+            // Named booleans rather than REQUIRE(a == b): inside a helper, clang-analyzer reports doctest's
+            // binary-expression message as a leak, a false positive in doctest.h.
+            const bool opened =
+                liara_platform_window_create(platform, &info, &window) == LIARA_RESULT_SUCCESS && window != nullptr;
+            REQUIRE(opened);
             return window;
         }
     };

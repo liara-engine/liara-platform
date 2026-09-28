@@ -3,6 +3,10 @@
 #include "Events.h"
 #include "Window.h"
 
+#include <liara/platform/event.h>
+
+#include <cstddef>
+#include <cstdint>
 #include <deque>
 #include <vector>
 

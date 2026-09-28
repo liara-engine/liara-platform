@@ -1,15 +1,22 @@
 #include "Window.h"
 
 #include "Instance.h"
+#include "VideoSubsystem.h"
+
+#include <liara/extent.h>
+#include <liara/native_window.h>
+#include <liara/platform/window.h>
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
-#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_properties.h>
 #include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_video.h>
 
 namespace
 {

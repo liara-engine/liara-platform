@@ -21,14 +21,10 @@
 #include <string_view>
 
 struct liara_platform_t
-{
-    Liara::Platform::Instance m_Instance;
-};
+{ Liara::Platform::Instance m_Instance; };
 
 struct liara_platform_window_t
-{
-    std::unique_ptr<Liara::Platform::Window> m_Window;
-};
+{ std::unique_ptr<Liara::Platform::Window> m_Window; };
 
 static constexpr liara_module_info_t LIARA_PLATFORM_MODULE_INFO = {
     .struct_version = LIARA_MODULE_INFO_VERSION,
@@ -62,9 +58,9 @@ liara_result_t liara_platform_create(const liara_platform_create_info_t* create_
     }
 }
 
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, misc-const-correctness)
 void liara_platform_destroy(liara_platform_handle_t* platform) {
-    // NOLINTEND(readability-identifier-naming)
+    // NOLINTEND(readability-identifier-naming, misc-const-correctness)
     if (platform == nullptr) { return; }
 #ifdef LIARA_ENABLE_ASSERTS
     // Windows are children of their instance and go first; one still open here is a programming error, caught in debug
@@ -111,15 +107,15 @@ liara_result_t liara_platform_window_create(liara_platform_handle_t* platform,
     }
 }
 
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, misc-const-correctness)
 void liara_platform_window_destroy(liara_platform_window_handle_t* window) {
-    // NOLINTEND(readability-identifier-naming)
+    // NOLINTEND(readability-identifier-naming, misc-const-correctness)
     delete window;
 }  // NOLINTEND(cppcoreguidelines-owning-memory)
 
-// NOLINTBEGIN(readability-identifier-naming)
+// NOLINTBEGIN(readability-identifier-naming, misc-const-correctness)
 liara_result_t liara_platform_install_signal_handlers(liara_platform_handle_t* platform) {
-    // NOLINTEND(readability-identifier-naming)
+    // NOLINTEND(readability-identifier-naming, misc-const-correctness)
     if (platform == nullptr) { return LIARA_RESULT_NULL_POINTER; }
     return Liara::Platform::Shutdown::Install() ? LIARA_RESULT_SUCCESS : LIARA_RESULT_FAILED;
 }

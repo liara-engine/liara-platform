@@ -1,6 +1,6 @@
 {
   "name": "liara-platform",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "The platform abstraction library for the Liara game engine.",
   "homepage": "https://github.com/liara-engine/liara-platform",
   "license": "MIT",
@@ -9,8 +9,14 @@
       "name": "sdl3",
       "default-features": false,
       "features": [
-        { "name": "x11", "platform": "linux" },
-        { "name": "wayland", "platform": "linux" }
+        {
+          "name": "x11",
+          "platform": "linux"
+        },
+        {
+          "name": "wayland",
+          "platform": "linux"
+        }
       ]
     }
   ],

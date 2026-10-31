@@ -21,10 +21,14 @@
 #include <string_view>
 
 struct liara_platform_t
-{ Liara::Platform::Instance m_Instance; };
+{
+    Liara::Platform::Instance m_Instance;
+};
 
 struct liara_platform_window_t
-{ std::unique_ptr<Liara::Platform::Window> m_Window; };
+{
+    std::unique_ptr<Liara::Platform::Window> m_Window;
+};
 
 static constexpr liara_module_info_t LIARA_PLATFORM_MODULE_INFO = {
     .struct_version = LIARA_MODULE_INFO_VERSION,

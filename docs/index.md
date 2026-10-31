@@ -18,7 +18,7 @@ That confinement is the whole point. "Linux and Windows are both first-class" is
 
 **OS signals and shutdown requests.** SIGINT, SIGTERM, the Windows console control events and the window's close button, which are deliberately one thing at the interface. The [module page](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/modules/platform/) explains why shutdown is polled rather than delivered through a callback, and the three constraints that follow from it.
 
-**Timing.** A monotonic clock and high-resolution counters, so the host's notion of time does not depend on which standard library it happened to be built against.
+**Timing.** A monotonic clock in nanoseconds, a separate wall clock, and a sleep to a deadline, so the host's notion of time does not depend on which standard library it happened to be built against.
 
 ## What it does not
 
@@ -28,11 +28,9 @@ No file I/O beyond resolving standard paths, since reading files is `liara-asset
 
 ## What exists today
 
-A skeleton. The module reports itself through `liara_platform_info()` and `liara_platform_abi_version()`, `src/` holds one file, and the contract in `liara-interfaces` declares those two functions and nothing more.
+The create and destroy lifecycle, the shutdown surface, the clock, and windows with their events. A window is opened through SDL3, reports its size in pixels, describes itself to a renderer through the tagged `liara_native_window_t`, and produces close and resize events that `liara_platform_poll_event` returns one at a time. A close request on the last open window of an instance makes `liara_platform_quit_requested` report a stop, as SIGINT does. Input devices are designed and not yet written.
 
-There is no window, no event pump, no clock, and no SDL3 dependency. That is deliberate rather than unfinished: the repository exists so the launcher can discover the module and negotiate its ABI version, and the rest of the interface is designed when its first implementation is written, which is [v0.1](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/roadmap/v0-1/).
-
-The `manifest.json` targets ABI 0.2.1, matching `liara-core` and `liara-renderer`. It moves when they move.
+`src/platform.cpp` is the ABI shim and holds nothing else. Behind it, `Instance`, `Window`, `VideoSubsystem`, `Events`, `Shutdown` and `Time` each hold one concern. The `manifest.json` `dev` entry tracks the unreleased ABI, as every module does until ABI 1.0.0 is tagged.
 
 ## Where to go next
 

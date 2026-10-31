@@ -37,6 +37,8 @@ if(NOT TARGET Liara::Interfaces)
             " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap)")
 endif()
 
+find_package(SDL3 CONFIG REQUIRED)
+
 if(PROJECT_IS_TOP_LEVEL)
     set(LIARA_PLATFORM_IS_TOP_LEVEL ON)
 else()
@@ -65,7 +67,16 @@ add_library(Liara::Platform ALIAS liara_platform)
 
 liara_configure_target(liara_platform)
 
-target_link_libraries(liara_platform PUBLIC Liara::Interfaces)
+target_link_libraries(liara_platform
+        PUBLIC Liara::Interfaces
+        PRIVATE SDL3::SDL3)
+
+# The default Linux triplet builds SDL as a static archive, and SDL declares its functions with default visibility, so
+# a shared liara_platform would otherwise re-export all of SDL and let it interpose with any other copy in the process.
+# Windows uses SDL3.dll, a separate library, where the question does not arise.
+if(BUILD_SHARED_LIBS AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_options(liara_platform PRIVATE "LINKER:--exclude-libs,ALL")
+endif()
 
 target_include_directories(liara_platform PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>

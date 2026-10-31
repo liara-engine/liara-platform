@@ -25,6 +25,7 @@ Checks: >
     readability-*,
     -readability-magic-numbers,
     -readability-identifier-length,
+    -readability-trailing-comma,
     -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 
 WarningsAsErrors: >
@@ -35,6 +36,11 @@ HeaderFilterRegex: '(include|src|tests)/.*\.(h|hpp|tpp)$'
 ExcludeHeaderFilterRegex: '(/vcpkg_installed/|/build/|/liara-interfaces/)'
 
 CheckOptions:
+    # doctest's TEST_CASE and CHECK macros expand into branches that count as cognitive complexity, so a plain test
+    # case with a dozen assertions crosses the threshold. The option counts the code written, not the expansion, as
+    # liara-interfaces already does.
+    -   key: readability-function-cognitive-complexity.IgnoreMacros
+        value: 'true'
     -   key: readability-identifier-naming.ClassCase
         value: CamelCase
     -   key: readability-identifier-naming.StructCase

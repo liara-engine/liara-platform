@@ -27,8 +27,6 @@ namespace
         Window* window = Window::FromSdlId(event.windowID);
         if (window == nullptr) { return; }
 
-        window->FillPlaceholder();  // A resize invalidates SDL's window surface; repaint so the window stays visible.
-
         liara_platform_event_t translated {};
         translated.type = LIARA_PLATFORM_EVENT_WINDOW_RESIZED;
         translated.timestamp_ns = Liara::Platform::Time::NowNs();

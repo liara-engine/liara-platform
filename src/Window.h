@@ -57,9 +57,6 @@ namespace Liara::Platform
         [[nodiscard]] bool PixelSize(liara_extent2d_t& outSize) const;
         [[nodiscard]] bool Native(liara_native_window_t& outNative) const;
 
-        /// Paints the placeholder. Best-effort: a failure leaves the content unspecified, which the contract allows.
-        void FillPlaceholder();
-
     private:
         Instance* m_Owner;
         liara_platform_window_handle_t* m_Handle;

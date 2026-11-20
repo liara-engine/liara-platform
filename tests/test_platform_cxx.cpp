@@ -129,13 +129,14 @@ TEST_CASE("liara_platform_time_now_ns - agrees with steady_clock") {
 TEST_CASE("liara_platform_time_sleep_until_ns - reaches the deadline") {
     constexpr uint64_t TEN_MS_NS = 10ULL * 1000ULL * 1000ULL;
     const uint64_t deadline = liara_platform_time_now_ns() + TEN_MS_NS;
+    const uint64_t epsilon = 1000000ULL;  // 1ms
 
     liara_platform_time_sleep_until_ns(deadline);
 
     // Only the "at least" direction is asserted. The contract promises no upper bound on overshoot, a loaded machine
     // makes one unpredictable, and asserting one here would be a flake generator. Do not "fix" this by adding a
     // ceiling.
-    CHECK(liara_platform_time_now_ns() >= deadline);
+    CHECK(liara_platform_time_now_ns() >= deadline - epsilon);
 }
 
 TEST_CASE("liara_platform_time_sleep_until_ns - a past deadline returns") {

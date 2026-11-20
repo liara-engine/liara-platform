@@ -8,8 +8,6 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
             "Remove the CMakeCache.txt and CMakeFiles/ this attempt just created before retrying.")
 endif()
 
-include(GNUInstallDirs)
-
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/.release-please-manifest.json" RELEASE_PLEASE_MANIFEST)
 string(JSON PROJECT_VERSION GET ${RELEASE_PLEASE_MANIFEST} ".")
 message(STATUS "LiaraPlatform version: ${PROJECT_VERSION}")
@@ -20,6 +18,8 @@ project(LiaraPlatform
         HOMEPAGE_URL "https://github.com/liara-engine/liara-platform"
         LANGUAGES CXX
 )
+
+include(GNUInstallDirs)
 
 configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/include/liara/platform/config.h.in"
